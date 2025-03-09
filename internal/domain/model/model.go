@@ -9,8 +9,8 @@ type Resource struct {
 }
 
 type Features struct {
-	CPU       float64 `json:"CPU"`
-	GLU       float64 `json:"GPU,omitempty"`
+	Cores     int     `json:"Cores"`
+	GPU       float64 `json:"GPU,omitempty"`
 	Memory    float64 `json:"Memory"`
 	DiskSpace float64 `json:"Disk"`
 }
