@@ -1,0 +1,4 @@
+broker:
+  address: $(KAFKA_ADDRESS):$(KAFKA_PORT)
+  topic: $(KAFKA_TOPIC)
+
