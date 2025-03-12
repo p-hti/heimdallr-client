@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/p-hti/heimdallr-client/internal/manage"
@@ -24,6 +25,7 @@ type MachineUseCases interface {
 }
 
 func NewBrokerWriter(addresses string, topic string, machine *manage.Machine) *Broker {
+	fmt.Println(addresses)
 	broker := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:  []string{addresses},
 		Topic:    topic,
@@ -53,7 +55,7 @@ func (b *Broker) SendResourceUsage(ctx context.Context, errChan chan<- error) {
 				errChan <- err
 				continue
 			}
-
+			fmt.Println(b.Machine.UsageResource)
 			err = b.KfWriter.WriteMessages(
 				context.Background(),
 				kafka.Message{

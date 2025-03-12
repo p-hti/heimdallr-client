@@ -22,13 +22,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	time.Sleep(5 * time.Second)
+
 	br := broker.NewBrokerWriter(cfg.Broker.KafkaAddress, cfg.Broker.KafkaTopic, machine)
 	fmt.Println("already conn")
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	fmt.Println("go to get resources")
 	go br.SendResourceUsage(ctx, errChan)
 
 	sigChan := make(chan os.Signal, 1)

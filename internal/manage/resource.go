@@ -1,6 +1,8 @@
 package manage
 
 import (
+	"math"
+	"net"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -41,18 +43,18 @@ func NewMachine() (*Machine, error) {
 		return &Machine{}, err
 	}
 
-	// conn, err := net.Dial("udp", "8.8.8.8:80")
-	// if err != nil {
-	// 	return &Machine{}, err
-	// }
-	// defer conn.Close()
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return &Machine{}, err
+	}
+	defer conn.Close()
 
-	// localAddr := conn.LocalAddr().(*net.UDPAddr)
-	// ip := localAddr.IP.String()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip := localAddr.IP.String()
 	machine := &Machine{
 		OS:       hostInfo.OS,
 		Hostname: hostInfo.Hostname,
-		IP:       "43242352",
+		IP:       ip,
 	}
 	err = machine.GetFeatures()
 	if err != nil {
@@ -75,10 +77,11 @@ func (m *Machine) GetFeatures() error {
 	mem, _ := mem.VirtualMemory()
 	// fmt.Printf("%.1f", float64(mem.Total)/1024/1024/1024)
 
+	memory := math.Floor((float64(mem.Total)/1024/1024/1024)*10) / 10
 	features := Features{
 		PhysicalCores: physicalCnt,
 		LogicalCores:  logicalCnt,
-		Memory:        float64(mem.Total) / 1024 / 1024 / 1024,
+		Memory:        memory,
 	}
 
 	m.Features = features
@@ -100,18 +103,18 @@ func (m *Machine) GetResourceUsage() error {
 	if err != nil {
 		return err
 	}
-	totalPercent, err := cpu.Percent(3*time.Second, false)
+	totalPercent, err := cpu.Percent(1*time.Second, false)
 	if err != nil {
 		return err
 	}
-	// perPercents, err := cpu.Percent(3*time.Second, true)
-	// if err != nil {
-	// 	return err
-	// }
+	perPercents, err := cpu.Percent(1*time.Second, true)
+	if err != nil {
+		return err
+	}
 
 	resources := Resource{
-		CPUUsage: totalPercent[0],
-		// CoreLoad:     perPercents,
+		CPUUsage:     totalPercent[0],
+		CoreLoad:     perPercents,
 		MemoryUsage:  memPercent.UsedPercent,
 		DiskUsage:    diskPercent.UsedPercent,
 		NetworkUsage: network[0].BytesSent,
