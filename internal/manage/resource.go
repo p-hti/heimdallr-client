@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/p-hti/heimdallr-client/internal/domain/model"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -12,29 +13,8 @@ import (
 	netUtil "github.com/shirou/gopsutil/net"
 )
 
-type Resource struct {
-	CPUUsage     float64   `json:"cpu_usage"`
-	CoreLoad     []float64 `json:"core_load"`
-	GPUUsage     float64   `json:"gpu_usage,omitempty"`
-	MemoryUsage  float64   `json:"memory_usage"`
-	DiskUsage    float64   `json:"disk_usage"`
-	NetworkUsage uint64    `json:"network_usage"`
-}
-
-type Features struct {
-	PhysicalCores int     `json:"physical_cores"`
-	LogicalCores  int     `json:"logical_cores"`
-	GPU           float64 `json:"gpu,omitempty"`
-	Memory        float64 `json:"memory"`
-	DiskSpace     float64 `json:"disk,omitempty"`
-}
-
 type Machine struct {
-	OS            string   `json:"os"`
-	Hostname      string   `json:"hostname"`
-	IP            string   `json:"ip"`
-	UsageResource Resource `json:"usage_resource,omitempty"`
-	Features      Features `json:"features,omitempty"`
+	model.Machine
 }
 
 func NewMachine() (*Machine, error) {
@@ -52,9 +32,11 @@ func NewMachine() (*Machine, error) {
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	ip := localAddr.IP.String()
 	machine := &Machine{
-		OS:       hostInfo.OS,
-		Hostname: hostInfo.Hostname,
-		IP:       ip,
+		Machine: model.Machine{
+			OS:       hostInfo.OS,
+			Hostname: hostInfo.Hostname,
+			IP:       ip,
+		},
 	}
 	err = machine.GetFeatures()
 	if err != nil {
@@ -78,7 +60,7 @@ func (m *Machine) GetFeatures() error {
 	// fmt.Printf("%.1f", float64(mem.Total)/1024/1024/1024)
 
 	memory := math.Floor((float64(mem.Total)/1024/1024/1024)*10) / 10
-	features := Features{
+	features := model.Features{
 		PhysicalCores: physicalCnt,
 		LogicalCores:  logicalCnt,
 		Memory:        memory,
@@ -112,7 +94,7 @@ func (m *Machine) GetResourceUsage() error {
 		return err
 	}
 
-	resources := Resource{
+	resources := model.Resource{
 		CPUUsage:     totalPercent[0],
 		CoreLoad:     perPercents,
 		MemoryUsage:  memPercent.UsedPercent,
