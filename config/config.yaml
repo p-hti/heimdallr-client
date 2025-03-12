@@ -1,4 +1,3 @@
 broker:
-  address: $(KAFKA_ADDRESS):$(KAFKA_PORT)
-  topic: $(KAFKA_TOPIC)
-
+  address: '%env(KAFKA_ADDRESS)%'
+  topic: metric1

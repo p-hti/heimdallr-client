@@ -1,0 +1,1 @@
+# there is no need to run kafka on the client, as there will be interaction with the remote machine. error due to ignorance
